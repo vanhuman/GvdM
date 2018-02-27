@@ -255,6 +255,7 @@ s.waitForBoot({
 		)
 	}).send(s);
 
+	s.sync;
 
 	///////////// functions /////////////
 
