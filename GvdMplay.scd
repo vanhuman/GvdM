@@ -45,24 +45,34 @@ s.waitForBoot({
 	//var client1 = NetAddr("192.168.1.58", 57120); // one-laptop version network settings
 	var announce_cues = 0; // set to 1 to see NEXT CUE long before
 	var volDefault = 0; // in db
-	var volLiveToMainDefault = -96; // in db
+	var volLiveToAltDefault = -192; // in db
+	var volLiveToMainDefault = 0; // in db
 
 	// MIDI files to be played
 	var midi_file_list =
 	[
 		"MIDI/MIDI deel 1a.mid",
 		"MIDI/MIDI deel 1c2.mid",
+
 		//	"MIDI/MIDI deel 2a2-vel20.mid", // for Conlon Disklavier
-		"MIDI/MIDI deel 2a2-vel10.mid", // for Conlon Disklavier revised 2013
+		// "MIDI/MIDI deel 2a2-vel10.mid", // for Conlon Disklavier revised 2013 --- latest
 		//	"MIDI/MIDI deel 2a2.mid", // for Conlon Disklavier  revised 2013 slightly more attack
-		//	"MIDI/MIDI deel 2a2+vel30.mid", // for Disklavier at Goldsmiths London
+		"MIDI/extra tracks/MIDI deel 2a2+10.mid",
+		//	"MIDI/extra tracks/MIDI deel 2a2+20.mid",
+		//	"MIDI/for Goldsmiths London Disklavier/MIDI deel 2a2+vel30.mid", // for Disklavier at Goldsmiths London
+
 		"MIDI/MIDI deel 2b.mid",
 		"MIDI/MIDI deel 2c.mid",
-		//	"MIDI/MIDI deel 3a.mid" // for Conlon Disklavier (same velocity as in Nuendo setup)
-		// "MIDI/MIDI deel 3a+vel10.mid" // for Conlon Disklavier revised 2013
-		"MIDI/MIDI deel 3a+vel20.mid" // for Conlon Disklavier revised 2013 slightly more attack
-		//	"MIDI/MIDI deel 3a+vel60.mid" // for Disklavier at Goldsmiths London,
+
+		//	"MIDI/MIDI deel 3a.mid", // for Conlon Disklavier (same velocity as in Nuendo setup)
+		// "MIDI/MIDI deel 3a+vel10.mid", // for Conlon Disklavier revised 2013
+		// "MIDI/MIDI deel 3a+vel20.mid", // for Conlon Disklavier revised 2013 slightly more attack --- latest
+		// "MIDI/extra tracks/MIDI deel 3a+vel30.mid",
+		"MIDI/extra tracks/MIDI deel 3a+vel40.mid",
+		// "MIDI/extra tracks/MIDI deel 3a+vel50.mid",
+		// "for Goldsmiths London Disklavier/MIDI/MIDI deel 3a+vel60.mid", // for Disklavier at Goldsmiths London,
 		// for regular Disklavier with more subtle response to velocity it should probably be vel40 or vel50
+
 		//	"MIDI/MIDI deel 3b+vel30.mid" // only on tape
 	];
 
@@ -671,7 +681,7 @@ s.waitForBoot({
 		.action_({
 			var value = volSpec.at(volFader.value);
 			volBus.set(value);
-			volFader.string = "  " + round(value.ampdb,0.1) + "db  (tape)";
+			volFader.string = "  " + round(value.ampdb,0.1) + "db  ( tape to main output [" + outMainChan ++ ", " ++ (outMainChan+1) ++ "] )";
 	}) );
 
 	volLiveFader = (SmoothSlider(wCues, Rect(250, 395, 230, 20))
@@ -683,7 +693,7 @@ s.waitForBoot({
 		.action_({
 			var value = volSpec.at(volLiveFader.value);
 			volLiveBus.set(value);
-			volLiveFader.string = "  " + round(value.ampdb,0.1) + "db  (live)";
+			volLiveFader.string = "  " + round(value.ampdb,0.1) + "db  ( live to alt output [" + outLiveChan ++ ", " ++ (outLiveChan+1) ++ "] )";
 	}) );
 
 	volLiveToMainFader = (SmoothSlider(wCues, Rect(250, 420, 230, 20))
@@ -695,7 +705,7 @@ s.waitForBoot({
 		.action_({
 			var value = volSpec.at(volLiveToMainFader.value);
 			volLiveToMainBus.set(value);
-			volLiveToMainFader.string = "  " + round(value.ampdb,0.1) + "db  (live to main)";
+			volLiveToMainFader.string = "  " + round(value.ampdb,0.1) + "db  ( live to main output [" + outMainChan ++ ", " ++ (outMainChan+1) ++ "] )";
 	}) );
 
 	// window with cues
@@ -747,9 +757,9 @@ s.waitForBoot({
 	b_disklavier.valueAction_(1 - disklavier_available);
 	midi_ports_select.valueAction_(midi_port_default);
 	start_from.valueAction_(1);
-	cue_type.valueAction_(4);
+	cue_type.valueAction_(2);
 	volFader.valueAction_(volSpec.asSpec.unmap(volDefault.dbamp));
-	volLiveFader.valueAction_(volSpec.asSpec.unmap(volDefault.dbamp));
+	volLiveFader.valueAction_(volSpec.asSpec.unmap(volLiveToAltDefault.dbamp));
 	volLiveToMainFader.valueAction_(volSpec.asSpec.unmap(volLiveToMainDefault.dbamp));
 
 	w = Window("dummy").front; w.close;
