@@ -31,13 +31,13 @@ s.waitForBoot({
 	var liveFilesOffsets = [ [0, 0, 1.8, 1.1, 0], [0, 0, 1.8, 1.1, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0] ];
 
 	var version = "3.0";
-	var outMainChan = 0;
+	var outMainChan = if (~aBus.notNil, { ~aBus.outMain }, { 0 });
 	var outLiveChan = 2;
 	var countdown = 3; // countdown seconds for cues
 	var dis_delay = 0.5; // delay to compensate for the Disklavier's build-in delay, when > 0.5 check timings in main task
 	var file_base = Document.dir++"GvdM/Data/";
 	var tape_silent = 0; // 1=tape not playing, 0=tape playing
-	var players_available = 0; // set to 0 if no players available
+	var players_available = 1; // set to 0 if no players available
 	var disklavier_available = 1; // set to 0 if no Disklavier available
 	//var client1 = NetAddr("10.0.0.2", 57121); // flute player network settings (to Max client)
 	//var client1 = NetAddr("10.0.0.2", 57120); // voice player network settings (to SC client)
@@ -46,7 +46,7 @@ s.waitForBoot({
 	var announce_cues = 0; // set to 1 to see NEXT CUE long before
 	var volDefault = 0; // in db
 	var volLiveToAltDefault = -192; // in db
-	var volLiveToMainDefault = 0; // in db
+	var volLiveToMainDefault = -192; // in db
 
 	// MIDI files to be played
 	var midi_file_list =
@@ -155,15 +155,15 @@ s.waitForBoot({
 		],
 		[
 			"\nOK\nHere we go [Solo cues]",
-			"\nCUE 1: switch off silent mode\n\nAt 3:43 start green1",
-			"\nCUE 2: player enters (green1 running)\n\nShort dynamic-length live sampling, playback forwards-backwards with subtle pitch modulation. \n\nAt 5:46 start green2",
-			"\nCUE 3: disklavier back with force (green2 is running)\n\nShort dynamic-length live sampling, playback with sample pointer offset modulation and forwards-backwards with subtle pitch modulation.",
-			"\nCUE 4: disklavier break!\n\nShort break of 2s then continue, until hard cut at Cue 5.",
-			"\nCUE 5: start loopy section\n\nLive sampling, playback in various time-domain patterns.\n\nAt 7:42 start green3",
-			"\nCUE 6: disklavier back with melody\n\nLive sampling, playback with amplitude modulation resembling flutter, at will subtly changing pitch, panning and sample pointer offset.",
-			"\nCUE 7: tape & player taking over\nShort dynamic-length live sampling, playback with sample pointer offset modulation and forwards-backwards with subtle pitch modulation.\n\nAt 11:03 start green4",
-			"\nCUE 8: the disklavier has the last word\nAFTER BREAK:\nShort dynamic-length live sampling, playback forwards-backwards with subtle pitch modulation.\n\nAt 11:55 start green5",
-			"\nCUE 9: player stops",
+			"\nCUE 1: switch off silent mode\n\nLoad blue1 & blue7, start decimate, set OS",
+			"\nCUE 2: player enters\n\nZone3 HPF with decimate\nZone2 short loop\nGreenDiskPlay1 prime\nZone6 OS short loops",
+			"\nCUE 3: disklavier back with force\n\nWhile playing Zone6, load blue8\nTake off OS\nZone6 bursts glissandi with reverb",
+			"\nCUE 4: disklavier break!\n\nShort break of 2s then continue, until hard cut at Cue 5.\nWhen Disklavier stops goto OS",
+			"\nCUE 5: start loopy section\n\nStart SynthKeys MIDI seq with Pad2, decimate, swing (K3@0.7)\nAdd processing",
+			"\nCUE 6: disklavier back with melody\n\nSampling & EFX on Disklavier",
+			"\nCUE 7: tape & player taking over\n\nLoad blue9\nZone6 extreme pitch in slow movements",
+			"\nCUE 8: the disklavier has the last word",
+			"\nCUE 9: the last chapter\n\nAdd subtle EFX on Disklavier",
 			"\nCUE 10: fade out contact mics in 15s",
 			"\nThe End\nThat's it folks"
 		],
@@ -250,7 +250,6 @@ s.waitForBoot({
 	///////////// synths /////////////
 
 	SynthDef(\audio_play, {| bufnum = 0, volBus |
-		// BufRateScale.kr(bufnum).poll(0.01);
 		Out.ar(outMainChan,
 			PlayBuf.ar(2, bufnum, BufRateScale.kr(bufnum), doneAction:2) * In.kr(volBus,1)
 		)
@@ -407,7 +406,7 @@ s.waitForBoot({
 		// main volume control
 		// if((chan==0 && num==7), {
 		if((chan==11 && num==8), {
-			volFader.valueAction_(value);
+			// volFader.valueAction_(value);
 		});
 	},
 	"/midi/control"
@@ -757,7 +756,7 @@ s.waitForBoot({
 	b_disklavier.valueAction_(1 - disklavier_available);
 	midi_ports_select.valueAction_(midi_port_default);
 	start_from.valueAction_(1);
-	cue_type.valueAction_(2);
+	cue_type.valueAction_(4);
 	volFader.valueAction_(volSpec.asSpec.unmap(volDefault.dbamp));
 	volLiveFader.valueAction_(volSpec.asSpec.unmap(volLiveToAltDefault.dbamp));
 	volLiveToMainFader.valueAction_(volSpec.asSpec.unmap(volLiveToMainDefault.dbamp));
